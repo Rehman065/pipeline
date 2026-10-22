@@ -1,0 +1,32 @@
+
+name: Basic Website CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Change permissions
+        run: |
+          sudo chown -R "$USER":www-data /var/www/html
+          sudo chmod -R 775 /var/www/html
+
+      - name: Deploy to /var/www/html
+        run: |
+          sudo rsync -av --delete \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            ./ /var/www/html/
+
+      - name: Verify deployment
+        run: |
+          curl -f http://localhost/
